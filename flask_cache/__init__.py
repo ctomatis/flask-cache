@@ -36,7 +36,8 @@ delchars = ''.join(c for c in map(chr, range(256)) if c not in valid_chars)
 if PY2:
     null_control = (None, delchars)
 else:
-    null_control = (dict((k,None) for k in delchars),)
+    null_control = (dict((k, None) for k in delchars),)
+
 
 def function_namespace(f, args=None):
     """
@@ -48,11 +49,11 @@ def function_namespace(f, args=None):
     instance_self = getattr(f, '__self__', None)
 
     if instance_self \
-    and not inspect.isclass(instance_self):
+            and not inspect.isclass(instance_self):
         instance_token = repr(f.__self__)
     elif m_args \
-    and m_args[0] == 'self' \
-    and args:
+            and m_args[0] == 'self' \
+            and args:
         instance_token = repr(args[0])
 
     module = f.__module__
@@ -63,7 +64,7 @@ def function_namespace(f, args=None):
         klass = getattr(f, '__self__', None)
 
         if klass \
-        and not inspect.isclass(klass):
+                and not inspect.isclass(klass):
             klass = klass.__class__
 
         if not klass:
@@ -91,6 +92,7 @@ def function_namespace(f, args=None):
         ins = None
 
     return ns, ins
+
 
 def make_template_fragment_key(fragment_name, vary_on=[]):
     """
@@ -184,7 +186,7 @@ class Cache(object):
 
         app.extensions.setdefault('cache', {})
         app.extensions['cache'][self] = cache_obj(
-                app, config, cache_args, cache_options)
+            app, config, cache_args, cache_options)
 
     @property
     def cache(self):
@@ -285,23 +287,26 @@ class Cache(object):
                     return f(*args, **kwargs)
 
                 try:
-                    cache_key = decorated_function.make_cache_key(*args, **kwargs)
+                    cache_key = decorated_function.make_cache_key(
+                        *args, **kwargs)
                     rv = self.cache.get(cache_key)
                 except Exception:
                     if current_app.debug:
                         raise
-                    logger.exception("Exception possibly due to cache backend.")
+                    logger.exception(
+                        "Exception possibly due to cache backend.")
                     return f(*args, **kwargs)
 
                 if rv is None:
                     rv = f(*args, **kwargs)
                     try:
                         self.cache.set(cache_key, rv,
-                                   timeout=decorated_function.cache_timeout)
+                                       timeout=decorated_function.cache_timeout)
                     except Exception:
                         if current_app.debug:
                             raise
-                        logger.exception("Exception possibly due to cache backend.")
+                        logger.exception(
+                            "Exception possibly due to cache backend.")
                         return f(*args, **kwargs)
                 return rv
 
@@ -309,7 +314,8 @@ class Cache(object):
                 if callable(key_prefix):
                     cache_key = key_prefix()
                 elif '%s' in key_prefix:
-                    cache_key = key_prefix % request.path
+                    # By default use full_path as key instead path
+                    cache_key = key_prefix % request.full_path
                 else:
                     cache_key = key_prefix
 
@@ -389,8 +395,8 @@ class Cache(object):
 
             if callable(f):
                 keyargs, keykwargs = self._memoize_kwargs_to_args(f,
-                                                                 *args,
-                                                                 **kwargs)
+                                                                  *args,
+                                                                  **kwargs)
             else:
                 keyargs, keykwargs = args, kwargs
 
@@ -431,8 +437,8 @@ class Cache(object):
             elif arg_num < len(args):
                 arg = args[arg_num]
                 arg_num += 1
-            elif abs(i-args_len) <= len(argspec.defaults):
-                arg = argspec.defaults[i-args_len]
+            elif abs(i - args_len) <= len(argspec.defaults):
+                arg = argspec.defaults[i - args_len]
                 arg_num += 1
             else:
                 arg = None
@@ -525,30 +531,34 @@ class Cache(object):
                     return f(*args, **kwargs)
 
                 try:
-                    cache_key = decorated_function.make_cache_key(f, *args, **kwargs)
+                    cache_key = decorated_function.make_cache_key(
+                        f, *args, **kwargs)
                     rv = self.cache.get(cache_key)
                 except Exception:
                     if current_app.debug:
                         raise
-                    logger.exception("Exception possibly due to cache backend.")
+                    logger.exception(
+                        "Exception possibly due to cache backend.")
                     return f(*args, **kwargs)
 
                 if rv is None:
                     rv = f(*args, **kwargs)
                     try:
                         self.cache.set(cache_key, rv,
-                                   timeout=decorated_function.cache_timeout)
+                                       timeout=decorated_function.cache_timeout)
                     except Exception:
                         if current_app.debug:
                             raise
-                        logger.exception("Exception possibly due to cache backend.")
+                        logger.exception(
+                            "Exception possibly due to cache backend.")
                 return rv
 
             decorated_function.uncached = f
             decorated_function.cache_timeout = timeout
             decorated_function.make_cache_key = self._memoize_make_cache_key(
-                                                make_name, decorated_function)
-            decorated_function.delete_memoized = lambda: self.delete_memoized(f)
+                make_name, decorated_function)
+            decorated_function.delete_memoized = lambda: self.delete_memoized(
+                f)
 
             return decorated_function
         return memoize
@@ -656,8 +666,7 @@ class Cache(object):
         """
         if not callable(f):
             raise DeprecationWarning("Deleting messages by relative name is no longer"
-                          " reliable, please switch to a function reference")
-
+                                     " reliable, please switch to a function reference")
 
         try:
             if not args and not kwargs:
@@ -684,7 +693,7 @@ class Cache(object):
         """
         if not callable(f):
             raise DeprecationWarning("Deleting messages by relative name is no longer"
-                          " reliable, please use a function reference")
+                                     " reliable, please use a function reference")
 
         try:
             self._memoize_version(f, delete=True)
